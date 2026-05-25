@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.A.P+ | 엠에이피 플러스</title>
+    <meta name="description" content="주거/상업공간 인테리어 디자인">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --warm-brown: #5b4c3d;
+            --light-brown: #8b7355;
+            --cream: #f5f0e8;
+            --dark-brown: #3d3229;
+            --white: #FAFAFA;
+            --pure-white: #FFFFFF;
+            --accent: #a08060;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', 'Noto Sans KR', sans-serif; background-color: var(--white); color: var(--warm-brown); line-height: 1.6; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 4rem; background: rgba(255,255,255,0.98); box-shadow: 0 2px 20px rgba(91,76,61,0.08); }
+        .logo { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em; cursor: pointer; }
+        .nav-links { display: flex; gap: 3rem; list-style: none; }
+        .nav-links li { position: relative; }
+        .nav-links a { text-decoration: none; color: var(--warm-brown); font-size: 0.85rem; font-weight: 500; letter-spacing: 0.15em; cursor: pointer; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+        .dropdown-menu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); padding-top: 1rem; opacity: 0; visibility: hidden; transition: all 0.3s; }
+        .nav-links li:hover .dropdown-menu { opacity: 1; visibility: visible; }
+        .dropdown-content { background: var(--pure-white); padding: 1rem 1.5rem; border-radius: 4px; box-shadow: 0 10px 40px rgba(91,76,61,0.15); min-width: 80px; }
+        .dropdown-item { padding: 0.5rem 0; font-size: 0.8rem; color: var(--warm-brown); cursor: pointer; text-align: center; transition: color 0.3s; }
+        .dropdown-item:hover { color: var(--accent); }
+        .hero { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 8rem 3rem 4rem; background: var(--cream); }
+        .hero-content { text-align: center; }
+        .hero h1 { font-size: clamp(3rem, 10vw, 6rem); font-weight: 500; letter-spacing: 0.15em; margin-bottom: 1rem; }
+        .hero-subtitle { font-size: 1rem; letter-spacing: 0.3em; color: var(--accent); margin-bottom: 2rem; }
+        .hero-tagline { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+        .tagline-item { text-align: center; }
+        .tagline-letter { font-size: 1.8rem; font-weight: 600; color: var(--accent); display: block; }
+        .tagline-word { font-size: 0.75rem; letter-spacing: 0.1em; }
+        .content-wrapper { padding: 4rem 3rem 6rem; max-width: 1600px; margin: 0 auto; }
+        .section-header { margin-bottom: 3rem; }
+        .section-title { font-size: 2.5rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .section-subtitle { font-size: 0.9rem; color: var(--light-brown); letter-spacing: 0.1em; }
+        .filter-container { display: flex; gap: 1.5rem; margin-bottom: 3rem; flex-wrap: wrap; }
+        .filter-btn { background: none; border: none; font-family: inherit; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.1em; color: var(--light-brown); cursor: pointer; padding: 0.5rem 0; position: relative; transition: color 0.3s; }
+        .filter-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--accent); transition: width 0.3s; }
+        .filter-btn:hover, .filter-btn.active { color: var(--warm-brown); }
+        .filter-btn.active::after { width: 100%; }
+        .masonry-grid { column-count: 3; column-gap: 1.5rem; }
+        @media (max-width: 1200px) { .masonry-grid { column-count: 2; } }
+        @media (max-width: 768px) { .masonry-grid { column-count: 1; } nav { padding: 1rem 1.5rem; } .nav-links { gap: 1.5rem; } .content-wrapper { padding: 4rem 1.5rem; } .dropdown-menu { display: none !important; } }
+        .project-card { break-inside: avoid; margin-bottom: 1.5rem; cursor: pointer; position: relative; overflow: hidden; border-radius: 8px; background: var(--cream); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .project-card:hover { transform: translateY(-8px); }
+        .project-card.tall { aspect-ratio: 3/4; }
+        .project-card.wide { aspect-ratio: 4/3; }
+        .project-card.square { aspect-ratio: 1/1; }
+        .project-card.portrait { aspect-ratio: 2/3; }
+        .project-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .project-card:hover img { transform: scale(1.05); }
+        .project-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem 1.5rem; background: linear-gradient(transparent, rgba(61,50,41,0.9)); opacity: 0; transition: opacity 0.4s; }
+        .project-card:hover .project-overlay { opacity: 1; }
+        .project-name { font-size: 1.1rem; font-weight: 500; color: var(--white); margin-bottom: 0.3rem; }
+        .project-category { font-size: 0.75rem; letter-spacing: 0.15em; color: var(--accent); }
+        .project-detail { padding: 8rem 3rem 4rem; max-width: 1400px; margin: 0 auto; }
+        .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; margin-bottom: 2rem; transition: color 0.3s; }
+        .back-btn:hover { color: var(--accent); }
+        .detail-header { margin-bottom: 3rem; }
+        .detail-title { font-size: 2.5rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .detail-category { font-size: 0.85rem; letter-spacing: 0.15em; color: var(--accent); }
+        .detail-images { display: grid; gap: 1rem; }
+        .detail-images img { width: 100%; border-radius: 8px; cursor: pointer; }
+        .lightbox { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+        .lightbox-close { position: absolute; top: 2rem; right: 2rem; color: white; font-size: 2rem; cursor: pointer; }
+        .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; font-size: 3rem; cursor: pointer; padding: 1rem; user-select: none; }
+        .lightbox-prev { left: 2rem; }
+        .lightbox-next { right: 2rem; }
+        .about-page, .contact-page { padding: 10rem 4rem 6rem; max-width: 1200px; margin: 0 auto; }
+        .about-page h1, .contact-page h1 { font-size: 3.5rem; font-weight: 500; margin-bottom: 2rem; }
+        .about-intro { font-size: 1.2rem; font-weight: 300; line-height: 1.9; max-width: 700px; margin-bottom: 4rem; }
+        .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+        .about-section h2 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.15em; margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 2px solid var(--accent); display: inline-block; }
+        .about-section p { font-size: 0.95rem; font-weight: 300; line-height: 1.9; margin-bottom: 1rem; }
+        .map-item { padding: 1.2rem 0; border-bottom: 1px solid rgba(91,76,61,0.1); }
+        .map-item h3 { font-size: 1.3rem; font-weight: 600; color: var(--accent); margin-bottom: 0.3rem; }
+        .contact-info { max-width: 400px; }
+        .contact-item { padding: 1.5rem 0; border-bottom: 1px solid rgba(91,76,61,0.15); }
+        .contact-label { font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.5rem; font-weight: 500; }
+        .contact-value { font-size: 1.1rem; }
+        .footer { background: var(--dark-brown); padding: 4rem 3rem; color: var(--cream); margin-top: 6rem; }
+        .footer-content { max-width: 1400px; margin: 0 auto; }
+        .footer h2 { font-size: 2rem; font-weight: 300; margin-bottom: 2rem; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .footer-label { font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 0.5rem; }
+        .footer-value { font-size: 0.95rem; font-weight: 300; }
+        .footer-copyright { padding-top: 2rem; border-top: 1px solid rgba(245,240,232,0.1); font-size: 0.8rem; opacity: 0.6; }
+        @media (max-width: 1024px) { .about-content { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .about-page, .contact-page { padding: 8rem 1.5rem 4rem; } .lightbox-nav { font-size: 2rem; } .lightbox-prev { left: 0.5rem; } .lightbox-next { right: 0.5rem; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 프로젝트 데이터
+        const ratios = ['tall', 'wide', 'square', 'portrait', 'wide', 'tall', 'square'];
+        const projectsData = [
+            { id: 1, name: "넷길이 콩나물국밥", location: "연신내", year: "2025", category: "음식점", images: ["images/2025/netgili_yeonsinne_1.jpg","images/2025/netgili_yeonsinne_2.jpg","images/2025/netgili_yeonsinne_3.jpg"] },
+            { id: 2, name: "단막", location: "동탄", year: "2025", category: "음식점", images: ["images/2025/danmak_dongtan_1.jpg","images/2025/danmak_dongtan_2.jpg","images/2025/danmak_dongtan_3.jpg"] },
+            { id: 3, name: "한우88", location: "응암점", year: "2025", category: "음식점", images: ["images/2025/hanwoo88_eungam_1.jpg"] },
+            { id: 4, name: "오끼", location: "연신내", year: "2024", category: "이자카야", images: ["images/2024/okki_yeonsinne_1.jpg","images/2024/okki_yeonsinne_2.jpg","images/2024/okki_yeonsinne_3.jpg","images/2024/okki_yeonsinne_4.jpg","images/2024/okki_yeonsinne_5.jpg","images/2024/okki_yeonsinne_6.jpg","images/2024/okki_yeonsinne_7.jpg","images/2024/okki_yeonsinne_8.jpg","images/2024/okki_yeonsinne_9.jpg","images/2024/okki_yeonsinne_10.jpg","images/2024/okki_yeonsinne_11.jpg","images/2024/okki_yeonsinne_12.jpg","images/2024/okki_yeonsinne_13.jpg","images/2024/okki_yeonsinne_14.jpg","images/2024/okki_yeonsinne_15.jpg","images/2024/okki_yeonsinne_16.jpg","images/2024/okki_yeonsinne_17.jpg"] },
+            { id: 8, name: "오끼", location: "수원", year: "2023", category: "이자카야", images: ["images/2023/okki_suwon_1.jpg","images/2023/okki_suwon_2.jpg","images/2023/okki_suwon_3.jpg","images/2023/okki_suwon_4.jpg","images/2023/okki_suwon_5.jpg","images/2023/okki_suwon_6.jpg","images/2023/okki_suwon_7.jpg","images/2023/okki_suwon_8.jpg","images/2023/okki_suwon_9.jpg","images/2023/okki_suwon_10.jpg","images/2023/okki_suwon_11.jpg","images/2023/okki_suwon_12.jpg","images/2023/okki_suwon_13.jpg","images/2023/okki_suwon_14.jpg","images/2023/okki_suwon_15.jpg","images/2023/okki_suwon_16.jpg"] },
+            { id: 5, name: "오끼", location: "안산 중앙", year: "2024", category: "이자카야", images: ["images/2024/okki_ansan_1.jpg","images/2024/okki_ansan_2.jpg","images/2024/okki_ansan_3.jpg","images/2024/okki_ansan_4.jpg","images/2024/okki_ansan_5.jpg","images/2024/okki_ansan_6.jpg","images/2024/okki_ansan_7.jpg","images/2024/okki_ansan_8.jpg","images/2024/okki_ansan_9.jpg","images/2024/okki_ansan_10.jpg","images/2024/okki_ansan_11.jpg","images/2024/okki_ansan_12.jpg","images/2024/okki_ansan_13.jpg"] },
+            { id: 6, name: "샷업", location: "혜화", year: "2024", category: "무인사진관", images: ["images/2024/shotup_hyehwa_1.jpg","images/2024/shotup_hyehwa_2.jpg","images/2024/shotup_hyehwa_3.jpg","images/2024/shotup_hyehwa_4.jpg","images/2024/shotup_hyehwa_5.jpg","images/2024/shotup_hyehwa_6.jpg","images/2024/shotup_hyehwa_7.jpg","images/2024/shotup_hyehwa_8.jpg"] },
+            { id: 7, name: "포르타나 피자", location: "수원", year: "2023", category: "음식점", images: ["images/2023/portana_suwon_1.jpg","images/2023/portana_suwon_2.jpg"] },
+            { id: 9, name: "오끼", location: "의정부", year: "2023", category: "이자카야", images: ["images/2023/okki_uijeongbu_1.jpg","images/2023/okki_uijeongbu_2.jpg","images/2023/okki_uijeongbu_3.jpg","images/2023/okki_uijeongbu_4.jpg","images/2023/okki_uijeongbu_5.jpg","images/2023/okki_uijeongbu_6.jpg","images/2023/okki_uijeongbu_7.jpg"] },
+            { id: 10, name: "오끼", location: "하남", year: "2023", category: "이자카야", images: ["images/2023/okki_hanam_1.jpg","images/2023/okki_hanam_2.jpg","images/2023/okki_hanam_3.jpg","images/2023/okki_hanam_4.jpg","images/2023/okki_hanam_5.jpg","images/2023/okki_hanam_6.jpg","images/2023/okki_hanam_7.jpg","images/2023/okki_hanam_8.jpg"] },
+            { id: 11, name: "오끼", location: "미아", year: "2023", category: "이자카야", images: ["images/2023/okki_mia_1.jpg","images/2023/okki_mia_2.jpg","images/2023/okki_mia_3.jpg","images/2023/okki_mia_4.jpg","images/2023/okki_mia_5.jpg","images/2023/okki_mia_6.jpg","images/2023/okki_mia_7.jpg","images/2023/okki_mia_8.jpg","images/2023/okki_mia_9.jpg","images/2023/okki_mia_10.jpg","images/2023/okki_mia_11.jpg","images/2023/okki_mia_12.jpg"] },
+            { id: 12, name: "오잘전맥집", location: "부산 서면", year: "2022", category: "음식점", images: ["images/2022/ojal_seomyeon_1.jpg","images/2022/ojal_seomyeon_2.jpg","images/2022/ojal_seomyeon_3.jpg","images/2022/ojal_seomyeon_4.jpg","images/2022/ojal_seomyeon_5.jpg","images/2022/ojal_seomyeon_6.jpg"] },
+            { id: 13, name: "포토그레이", location: "의정부", year: "2022", category: "무인사진관", images: ["images/2022/photogray_uijeongbu_1.jpg","images/2022/photogray_uijeongbu_2.jpg","images/2022/photogray_uijeongbu_3.jpg","images/2022/photogray_uijeongbu_4.jpg","images/2022/photogray_uijeongbu_5.jpg","images/2022/photogray_uijeongbu_6.jpg"] },
+            { id: 14, name: "노포식당 2호점", location: "위례", year: "2021", category: "음식점", images: ["images/2021/nopo_wirye_1.jpg","images/2021/nopo_wirye_2.jpg","images/2021/nopo_wirye_3.jpg","images/2021/nopo_wirye_4.jpg","images/2021/nopo_wirye_5.jpg"] },
+            { id: 15, name: "글로벌피부과학연구원", location: "송파", year: "2021", category: "연구원", images: ["images/2021/global_songpa_1.jpg","images/2021/global_songpa_2.jpg","images/2021/global_songpa_3.jpg","images/2021/global_songpa_4.jpg","images/2021/global_songpa_5.jpg","images/2021/global_songpa_6.jpg","images/2021/global_songpa_7.jpg","images/2021/global_songpa_8.jpg","images/2021/global_songpa_9.jpg","images/2021/global_songpa_10.jpg","images/2021/global_songpa_11.jpg"] },
+            { id: 16, name: "포토그레이", location: "안양", year: "2021", category: "무인사진관", images: ["images/2021/photogray_anyang_1.jpg","images/2021/photogray_anyang_2.jpg","images/2021/photogray_anyang_3.jpg","images/2021/photogray_anyang_4.jpg"] },
+            { id: 17, name: "포토그레이", location: "천안", year: "2021", category: "무인사진관", images: ["images/2021/photogray_cheonan_1.jpg","images/2021/photogray_cheonan_2.jpg","images/2021/photogray_cheonan_3.jpg","images/2021/photogray_cheonan_4.jpg","images/2021/photogray_cheonan_5.jpg"] },
+            { id: 18, name: "포토그레이", location: "홍대", year: "2021", category: "무인사진관", images: ["images/2021/photogray_hongdae_1.jpg","images/2021/photogray_hongdae_2.jpg"] },
+            { id: 19, name: "포토그레이", location: "수원", year: "2021", category: "무인사진관", images: ["images/2021/photogray_suwon_1.jpg","images/2021/photogray_suwon_2.jpg"] },
+            { id: 20, name: "포토그레이", location: "대전", year: "2021", category: "무인사진관", images: ["images/2021/photogray_daejeon_1.jpg","images/2021/photogray_daejeon_2.jpg","images/2021/photogray_daejeon_3.jpg","images/2021/photogray_daejeon_4.jpg"] },
+            { id: 21, name: "포토그레이", location: "광주", year: "2021", category: "무인사진관", images: ["images/2021/photogray_gwangju_1.jpg","images/2021/photogray_gwangju_2.jpg","images/2021/photogray_gwangju_3.jpg","images/2021/photogray_gwangju_4.jpg","images/2021/photogray_gwangju_5.jpg"] },
+            { id: 22, name: "포토그레이", location: "대학로", year: "2021", category: "무인사진관", images: ["images/2021/photogray_daehakro_1.jpg","images/2021/photogray_daehakro_2.jpg","images/2021/photogray_daehakro_3.jpg"] },
+            { id: 23, name: "포토그레이", location: "대구 동성로", year: "2021", category: "무인사진관", images: ["images/2021/photogray_daegu_1.jpg","images/2021/photogray_daegu_2.jpg","images/2021/photogray_daegu_3.jpg","images/2021/photogray_daegu_4.jpg","images/2021/photogray_daegu_5.jpg","images/2021/photogray_daegu_6.jpg","images/2021/photogray_daegu_7.jpg"] },
+            { id: 24, name: "곱깨비", location: "봉천", year: "2020", category: "음식점", images: ["images/2020/gopkkebi_bongcheon_1.jpg"] },
+            { id: 25, name: "곱깨비", location: "당진", year: "2020", category: "음식점", images: ["images/2020/gopkkebi_dangjin_1.jpg"] },
+            { id: 26, name: "별바", location: "", year: "2019", category: "바", images: ["images/2019/byeolba_1.jpg"] },
+            { id: 27, name: "청담이상", location: "목동점", year: "2019", category: "이자카야", images: ["images/2019/cheongdam_mokdong_1.jpg","images/2019/cheongdam_mokdong_2.jpg","images/2019/cheongdam_mokdong_3.jpg","images/2019/cheongdam_mokdong_4.jpg"] },
+            { id: 28, name: "서울여대 구시아", location: "", year: "2019", category: "학생식당", images: ["images/2019/swu_gusia_1.jpg"] },
+            { id: 29, name: "팬도로시", location: "고려대점", year: "2019", category: "카페", images: ["images/2019/pandorosi_korea_1.jpg","images/2019/pandorosi_korea_2.jpg","images/2019/pandorosi_korea_3.jpg"] },
+            { id: 30, name: "청담이상", location: "마곡점", year: "2018", category: "이자카야", images: ["images/2018/cheongdam_magok_1.jpg","images/2018/cheongdam_magok_2.jpg"] },
+            { id: 31, name: "LOXID GATEAU", location: "", year: "2018", category: "카페", images: ["images/2018/loxid_gateau_1.jpg","images/2018/loxid_gateau_2.jpg","images/2018/loxid_gateau_3.jpg","images/2018/loxid_gateau_4.jpg","images/2018/loxid_gateau_5.jpg"] },
+            { id: 32, name: "청담이상", location: "포항1호점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_pohang_1.jpg","images/2016/cheongdam_pohang_2.jpg","images/2016/cheongdam_pohang_3.jpg"] },
+            { id: 33, name: "청담이상", location: "원주 단계점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_wonju_1.jpg","images/2016/cheongdam_wonju_2.jpg","images/2016/cheongdam_wonju_3.jpg"] },
+            { id: 34, name: "청담이상", location: "청주 복대점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_cheongju_1.jpg","images/2016/cheongdam_cheongju_2.jpg","images/2016/cheongdam_cheongju_3.jpg"] },
+            { id: 35, name: "청담이상", location: "대구점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_daegu_1.jpg","images/2016/cheongdam_daegu_2.jpg"] },
+            { id: 36, name: "청담이상", location: "부산 서면점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_busan_1.jpg","images/2016/cheongdam_busan_2.jpg","images/2016/cheongdam_busan_3.jpg"] },
+            { id: 37, name: "청담이상", location: "의정부점", year: "2016", category: "이자카야", images: ["images/2016/cheongdam_uijeongbu_1.jpg","images/2016/cheongdam_uijeongbu_2.jpg"] },
+        ];
+
+        const years = ['ALL', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2016'];
+
+        function Navigation({ setCurrentPage, setFilter }) {
+            const handleYearClick = (year) => {
+                setFilter(year);
+                setCurrentPage('projects');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            return (
+                <nav>
+                    <div className="logo" onClick={() => setCurrentPage('home')}>M.A.P+</div>
+                    <ul className="nav-links">
+                        <li><a onClick={() => setCurrentPage('about')}>ABOUT US</a></li>
+                        <li>
+                            <a onClick={() => handleYearClick('ALL')}>PROJECT</a>
+                            <div className="dropdown-menu">
+                                <div className="dropdown-content">
+                                    {years.filter(y => y !== 'ALL').map(year => (
+                                        <div key={year} className="dropdown-item" onClick={() => handleYearClick(year)}>{year}</div>
+                                    ))}
+                                </div>
+                            </div>
+                        </li>
+                        <li><a onClick={() => setCurrentPage('contact')}>CONTACT</a></li>
+                    </ul>
+                </nav>
+            );
+        }
+
+        function Lightbox({ images, currentIndex, onClose, onPrev, onNext }) {
+            useEffect(() => {
+                const handleKey = (e) => {
+                    if (e.key === 'Escape') onClose();
+                    if (e.key === 'ArrowLeft') onPrev();
+                    if (e.key === 'ArrowRight') onNext();
+                };
+                window.addEventListener('keydown', handleKey);
+                return () => window.removeEventListener('keydown', handleKey);
+            }, [onClose, onPrev, onNext]);
+            return (
+                <div className="lightbox" onClick={onClose}>
+                    <div className="lightbox-close">×</div>
+                    <div className="lightbox-nav lightbox-prev" onClick={(e) => { e.stopPropagation(); onPrev(); }}>‹</div>
+                    <img src={images[currentIndex]} alt="" onClick={(e) => e.stopPropagation()} />
+                    <div className="lightbox-nav lightbox-next" onClick={(e) => { e.stopPropagation(); onNext(); }}>›</div>
+                </div>
+            );
+        }
+
+        function Home({ setCurrentPage, setFilter }) {
+            const recentProjects = (() => {
+                const byCategory = {};
+                projectsData.forEach(p => {
+                    if (!byCategory[p.category]) byCategory[p.category] = [];
+                    byCategory[p.category].push(p);
+                });
+                const result = [];
+                Object.values(byCategory).forEach(projects => {
+                    result.push(...projects.slice(0, 2));
+                });
+                return result;
+            })();
+            return (
+                <>
+                    <div className="hero">
+                        <div className="hero-content">
+                            <h1>M.A.P+</h1>
+                            <div className="hero-subtitle">Interior Design Studio</div>
+                            <div className="hero-tagline">
+                                <div className="tagline-item"><span className="tagline-letter">M</span><span className="tagline-word">Make</span></div>
+                                <div className="tagline-item"><span className="tagline-letter">A</span><span className="tagline-word">Analyze</span></div>
+                                <div className="tagline-item"><span className="tagline-letter">P</span><span className="tagline-word">Plan</span></div>
+                                <div className="tagline-item"><span className="tagline-letter">+</span><span className="tagline-word">Plus</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="content-wrapper">
+                        <div className="section-header">
+                            <h2 className="section-title">Recent Projects</h2>
+                            <p className="section-subtitle">최근 프로젝트</p>
+                        </div>
+                        <div className="masonry-grid">
+                            {recentProjects.map((project, idx) => (
+                                <div key={project.id} className={`project-card ${ratios[idx % ratios.length]}`} onClick={() => { setCurrentPage('detail'); window.selectedProject = project; }}>
+                                    <img src={project.images[0]} alt={project.name} loading="lazy" />
+                                    <div className="project-overlay">
+                                        <div className="project-name">{project.name}{project.location ? ` - ${project.location}` : ''}</div>
+                                        <div className="project-category">{project.category}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        function Projects({ filter, setFilter, setCurrentPage }) {
+            const filtered = filter === 'ALL' ? projectsData : projectsData.filter(p => p.year === filter);
+            return (
+                <div className="content-wrapper" style={{paddingTop: '7rem'}}>
+                    <div className="section-header">
+                        <h2 className="section-title">Projects</h2>
+                        <p className="section-subtitle">Our Project</p>
+                    </div>
+                    <div className="filter-container">
+                        {years.map(year => (
+                            <button key={year} className={`filter-btn ${filter === year ? 'active' : ''}`} onClick={() => setFilter(year)}>{year}</button>
+                        ))}
+                    </div>
+                    <div className="masonry-grid">
+                        {filtered.map((project, idx) => (
+                            <div key={project.id} className={`project-card ${ratios[idx % ratios.length]}`} onClick={() => { setCurrentPage('detail'); window.selectedProject = project; }}>
+                                <img src={project.images[0]} alt={project.name} loading="lazy" />
+                                <div className="project-overlay">
+                                    <div className="project-name">{project.name}{project.location ? ` - ${project.location}` : ''}</div>
+                                    <div className="project-category">{project.category}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function ProjectDetail({ setCurrentPage }) {
+            const project = window.selectedProject;
+            const [lightboxOpen, setLightboxOpen] = useState(false);
+            const [lightboxIndex, setLightboxIndex] = useState(0);
+            if (!project) return null;
+            return (
+                <div className="project-detail">
+                    <div className="back-btn" onClick={() => setCurrentPage('projects')}>← 목록으로</div>
+                    <div className="detail-header">
+                        <h1 className="detail-title">{project.name}{project.location ? ` - ${project.location}` : ''}</h1>
+                        <div className="detail-category">{project.year}</div>
+                    </div>
+                    <div className="detail-images">
+                        {project.images.map((img, idx) => (
+                            <img key={idx} src={img} alt="" loading="lazy" onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }} />
+                        ))}
+                    </div>
+                    {lightboxOpen && (
+                        <Lightbox 
+                            images={project.images}
+                            currentIndex={lightboxIndex}
+                            onClose={() => setLightboxOpen(false)}
+                            onPrev={() => setLightboxIndex((lightboxIndex - 1 + project.images.length) % project.images.length)}
+                            onNext={() => setLightboxIndex((lightboxIndex + 1) % project.images.length)}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        function About() {
+            return (
+                <div className="about-page">
+                    <h1>ABOUT US</h1>
+                    <p className="about-intro">M.A.P+는 주거 및 상업 공간 인테리어 디자인 전문 스튜디오입니다. 창의적인 솔루션으로 고객의 공간에 새로운 가치를 더합니다.</p>
+                    <div className="about-content">
+                        <div className="about-section">
+                            <h2>M.A.P+</h2>
+                            <div className="map-item"><h3>Make</h3><p>창의적인 솔루션을 제공합니다.</p></div>
+                            <div className="map-item"><h3>Analyze</h3><p>맞춤형 디자인을 구현합니다.</p></div>
+                            <div className="map-item"><h3>Plan +</h3><p>철저한 계획 수립과 실행으로 만족도를 높입니다.</p></div>
+                        </div>
+                        <div className="about-section">
+                            <h2>WHAT WE DO</h2>
+                            <p>음식점, 카페, 바, 사진관, 사무실 등 다양한 상업 공간의 인테리어 디자인과 시공을 진행합니다.</p>
+                            <p>공간의 특성과 브랜드 아이덴티티를 반영한 맞춤형 디자인으로 고객의 비즈니스 성공을 돕습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Contact() {
+            return (
+                <div className="contact-page">
+                    <h1>CONTACT</h1>
+                    <div className="contact-info">
+                        <div className="contact-item"><div className="contact-label">TEL</div><div className="contact-value">010-7363-0280</div></div>
+                        <div className="contact-item"><div className="contact-label">EMAIL</div><div className="contact-value">ino87x@naver.com</div></div>
+                        <div className="contact-item"><div className="contact-label">LOCATION</div><div className="contact-value">Seoul, Korea</div></div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Footer() {
+            return (
+                <div className="footer">
+                    <div className="footer-content">
+                        <h2>LET'S WORK TOGETHER</h2>
+                        <div className="footer-grid">
+                            <div><div className="footer-label">TEL</div><div className="footer-value">010-7363-0280</div></div>
+                            <div><div className="footer-label">EMAIL</div><div className="footer-value">ino87x@naver.com</div></div>
+                        </div>
+                        <div className="footer-copyright">ⓒ 2022 엠에이피플러스 M.A.P+</div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [filter, setFilter] = useState('ALL');
+            useEffect(() => {
+                const handlePopState = (e) => setCurrentPage(e.state?.page || 'home');
+                window.addEventListener('popstate', handlePopState);
+                return () => window.removeEventListener('popstate', handlePopState);
+            }, []);
+            const changePage = (page) => {
+                window.history.pushState({ page }, '', `#${page}`);
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            let content;
+            switch(currentPage) {
+                case 'home': content = <Home setCurrentPage={changePage} setFilter={setFilter} />; break;
+                case 'projects': content = <Projects filter={filter} setFilter={setFilter} setCurrentPage={changePage} />; break;
+                case 'detail': content = <ProjectDetail setCurrentPage={changePage} />; break;
+                case 'about': content = <About />; break;
+                case 'contact': content = <Contact />; break;
+                default: content = <Home setCurrentPage={changePage} setFilter={setFilter} />;
+            }
+            return (
+                <>
+                    <Navigation setCurrentPage={changePage} setFilter={setFilter} />
+                    <main>{content}</main>
+                    <Footer />
+                </>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
